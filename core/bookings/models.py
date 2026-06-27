@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from catalog_21.models import Disc, Room
+from django.contrib.auth.models import User
 
 
 class Booking(models.Model):
@@ -15,6 +16,14 @@ class Booking(models.Model):
     # Данные клиента (оставляем текстом для скорости, как в тетради)
     client_name = models.CharField("Имя клиента", max_length=100)
     client_phone = models.CharField("Телефон", max_length=20, blank=True)
+
+    employee = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        verbose_name="Оформил сотрудник",
+        null=True,
+        blank=True
+    )
 
     # Связь с каталогом
     disc = models.ForeignKey(Disc, on_delete=models.PROTECT, verbose_name="Диск с игрой")

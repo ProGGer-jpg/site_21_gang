@@ -3,8 +3,10 @@ from django.contrib import messages
 from django.utils import timezone
 from .forms import QuickBookingForm
 from .models import Booking
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def quick_booking(request):
     # 1. Автоматически завершаем все истекшие брони
     Booking.objects.filter(
@@ -18,6 +20,7 @@ def quick_booking(request):
         if form.is_valid():
             booking = form.save(commit=False)
             booking.status = 'ACTIVE'
+            booking.employee = request.user
             booking.save()
             messages.success(request, f'✅ Успешно! {booking.client_name} забронировал {booking.disc.game.title}')
             return redirect('quick_booking')
