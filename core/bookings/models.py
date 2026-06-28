@@ -3,9 +3,11 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from catalog_21.models import Disc, Room
 from django.contrib.auth.models import User
+from datetime import timedelta
 
 
 class Booking(models.Model):
+    MAX_HOURS = 3
     """Запись в тетради (Бронирование)"""
 
     class Status(models.TextChoices):
@@ -39,21 +41,38 @@ class Booking(models.Model):
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
     def clean(self):
-        """Проверка на пересечение броней (КРИТИЧНО ВАЖНО)"""
+        """Проверка на пересечение броней и ограничение по времени"""
         super().clean()
         if self.start_time and self.end_time:
+            duration = self.end_time - self.start_time
+
+            # 1. Проверка логики времени
             if self.start_time >= self.end_time:
                 raise ValidationError("Время начала должно быть раньше времени конца.")
 
-            # Ищем пересекающиеся АКТИВНЫЕ брони для ЭТОГО ЖЕ ДИСКА
+            # 2. Запрет бронирования в прошлом
+            # Мы даем "окно" в 5 минут, чтобы можно было редактировать брони, которые только что начались
+            if self.start_time < timezone.now() - timedelta(minutes=5):
+                raise ValidationError("Нельзя создавать брони в прошлом.")
+
+            # 3. Проверка на максимальное время (3 часа)
+            if duration > timedelta(hours=self.MAX_HOURS):
+                raise ValidationError(
+                    f"Бронирование не может быть дольше {self.MAX_HOURS} часов."
+                )
+
+            # 4. Проверка на минимальное время (30 минут)
+            if duration < timedelta(minutes=30):
+                raise ValidationError("Минимальное время бронирования — 30 минут.")
+
+            # 5. Проверка на пересечения (самая важная)
             overlapping = Booking.objects.filter(
                 disc=self.disc,
                 status='ACTIVE',
-                start_time__lt=self.end_time,  # Начало существующей < Конец новой
-                end_time__gt=self.start_time  # Конец существующей > Начало новой
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
             )
 
-            # Если мы редактируем существующую бронь, исключаем её саму из проверки
             if self.pk:
                 overlapping = overlapping.exclude(pk=self.pk)
 

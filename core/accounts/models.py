@@ -11,7 +11,7 @@ class EmployeeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     role = models.CharField("Роль", max_length=20, choices=Role.choices, default=Role.EMPLOYEE)
     phone = models.CharField("Телефон", max_length=20, blank=True)
-    avatar = models.ImageField("Аватар", upload_to='avatars/', blank=True, null=True)
+    # avatar = models.ImageField("Аватар", upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.get_role_display()})"

@@ -3,10 +3,8 @@ from django.contrib import messages
 from django.utils import timezone
 from .forms import QuickBookingForm
 from .models import Booking
-from django.contrib.auth.decorators import login_required
 
 
-@login_required
 def quick_booking(request):
     # 1. Автоматически завершаем все истекшие брони
     Booking.objects.filter(
@@ -16,21 +14,23 @@ def quick_booking(request):
 
     # 2. Обработка формы
     if request.method == 'POST':
-        form = QuickBookingForm(request.POST)
+        # Передаем пользователя в форму
+        form = QuickBookingForm(request.POST, user=request.user)
         if form.is_valid():
             booking = form.save(commit=False)
             booking.status = 'ACTIVE'
-            booking.employee = request.user
+            booking.employee = request.user  # Автоматически указываем сотрудника
             booking.save()
             messages.success(request, f'✅ Успешно! {booking.client_name} забронировал {booking.disc.game.title}')
             return redirect('quick_booking')
         else:
-            # Показываем ошибки (например, диск занят)
+            # Показываем ошибки
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"❌ {error}")
     else:
-        form = QuickBookingForm()
+        # Передаем пользователя в форму при GET запросе
+        form = QuickBookingForm(user=request.user)
 
     # 3. Разделяем брони на две категории
     now = timezone.now()

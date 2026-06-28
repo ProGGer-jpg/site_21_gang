@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Platform, Game, Disc, Room, Client
+from .models import Platform, Game, Disc, Room
 
 
 @admin.register(Platform)
@@ -29,10 +29,3 @@ class DiscAdmin(admin.ModelAdmin):
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('name', 'platform', 'is_active')
     list_filter = ('platform', 'is_active')
-
-
-@admin.register(Client)
-class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'is_blacklisted', 'created_at')
-    list_filter = ('is_blacklisted',)
-    search_fields = ('name', 'phone')

@@ -48,6 +48,9 @@
                         <div class="mb-3">
                             <label class="form-label">Имя клиента</label>
                             {{ form.client_name }}
+                            <small class="form-text text-muted">
+                                Заполнено автоматически. Измените, если клиент другой.
+                            </small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Телефон</label>
@@ -67,12 +70,21 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Начало</label>
                                 {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                <div class="text-danger">{{ form.start_time.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Конец</label>
                                 {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                <div class="text-danger">{{ form.end_time.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
+                        <small class="text-muted d-block mb-3">
+                            ⏰ Максимальное время бронирования: 3 часа. Минимальное: 30 минут.
+                        </small>
 
                         <button type="submit" class="btn btn-success w-100 btn-lg">💾 Забронировать</button>
                     </form>

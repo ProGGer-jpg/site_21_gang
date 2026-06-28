@@ -70,21 +70,3 @@ class Room(models.Model):
         verbose_name = "Комната"
         verbose_name_plural = "Комнаты"
         ordering = ['name']
-
-
-class Client(models.Model):
-    """Клиент (используется в бронях, турнирах и т.д.)"""
-    name = models.CharField("Имя / Никнейм", max_length=100)
-    phone = models.CharField("Телефон", max_length=20, blank=True)
-    is_blacklisted = models.BooleanField("В черном списке", default=False)
-    notes = models.TextField("Заметки о клиенте", blank=True)
-    created_at = models.DateTimeField("Дата регистрации", auto_now_add=True)
-
-    def __str__(self):
-        status = "🚫" if self.is_blacklisted else "✅"
-        return f"{status} {self.name}"
-
-    class Meta:
-        verbose_name = "Клиент"
-        verbose_name_plural = "Клиенты"
-        ordering = ['-created_at']
