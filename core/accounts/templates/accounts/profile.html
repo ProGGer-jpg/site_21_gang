@@ -41,13 +41,14 @@
             </div>
         </div>
 
-        <!-- Правая колонка: Брони -->
+        <!-- Правая колонка: Брони и пользователи -->
         <div class="col-md-8">
-            <div class="card shadow">
+            <!-- Брони -->
+            <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
                         {% if user.is_superuser %}
-                             Все активные брони
+                            📋 Все активные брони
                         {% else %}
                             📋 Мои активные брони
                         {% endif %}
@@ -55,15 +56,6 @@
                     <span class="badge bg-light text-dark">{{ user_bookings.count }}</span>
                 </div>
                 <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
                     {% if user_bookings %}
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -127,6 +119,62 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Пользователи (только для админов) -->
+            {% if user.is_superuser and all_users %}
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">👥 Все сотрудники</h4>
+                    <span class="badge bg-dark text-light">{{ all_users.count }}</span>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Логин</th>
+                                    <th>Имя</th>
+                                    <th>Email</th>
+                                    <th>Дата регистрации</th>
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp_user in all_users %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ emp_user.username }}</strong>
+                                            {% if emp_user.is_staff %}
+                                                <span class="badge bg-info">Сотрудник</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ emp_user.get_full_name|default:"—" }}</td>
+                                        <td>{{ emp_user.email|default:"—" }}</td>
+                                        <td><small>{{ emp_user.date_joined|date:"d.m.Y" }}</small></td>
+                                        <td>
+                                            <a href="{% url 'delete_user' emp_user.id %}"
+                                               class="btn btn-danger btn-sm"
+                                               onclick="return confirm('Вы уверены, что хотите удалить пользователя {{ emp_user.username }}? Это действие нельзя отменить.')">
+                                                🗑️ Удалить
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

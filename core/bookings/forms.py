@@ -20,9 +20,15 @@ class QuickBookingForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        # Получаем текущего пользователя
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
+        # ВАЖНО: Привязываем сотрудника к экземпляру модели ДО валидации
+        if self.user:
+            self.instance.employee = self.user
+
+        # Автозаполнение имени клиента (только для новых броней)
         if self.user and not self.instance.pk:
             self.fields['client_name'].initial = self.user.get_full_name() or self.user.username
 

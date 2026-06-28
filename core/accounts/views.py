@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 from bookings.models import Booking
@@ -68,16 +69,20 @@ def profile_view(request):
     if request.user.is_superuser:
         # Админ видит все активные брони
         user_bookings = Booking.objects.filter(status='ACTIVE').order_by('-start_time')
+        # Админ видит всех пользователей (кроме себя)
+        all_users = User.objects.exclude(id=request.user.id).order_by('-date_joined')
     else:
         # Обычный сотрудник видит только свои брони
         user_bookings = Booking.objects.filter(
             employee=request.user,
             status='ACTIVE'
         ).order_by('-start_time')
+        all_users = None
 
     return render(request, 'accounts/profile.html', {
         'profile': profile,
         'user_bookings': user_bookings,
+        'all_users': all_users,
         'now': timezone.now(),
     })
 
@@ -102,4 +107,33 @@ def cancel_booking(request, booking_id):
     booking.save()
 
     messages.success(request, f'✅ Бронь {booking.client_name} успешно отменена')
+    return redirect('profile')
+
+
+@login_required
+def delete_user(request, user_id):
+    """Удаление пользователя (только для админов)"""
+    # Проверяем, что это админ
+    if not request.user.is_superuser:
+        messages.error(request, '❌ Только администраторы могут удалять пользователей')
+        return redirect('profile')
+
+    # Получаем пользователя для удаления
+    user_to_delete = get_object_or_404(User, id=user_id)
+
+    # Защита от удаления самого себя
+    if user_to_delete == request.user:
+        messages.error(request, '❌ Вы не можете удалить сами себя')
+        return redirect('profile')
+
+    # Защита от удаления других суперпользователей (опционально)
+    if user_to_delete.is_superuser:
+        messages.error(request, '❌ Нельзя удалить другого администратора')
+        return redirect('profile')
+
+    # Удаляем пользователя
+    username = user_to_delete.username
+    user_to_delete.delete()
+
+    messages.success(request, f'✅ Пользователь {username} успешно удален')
     return redirect('profile')
