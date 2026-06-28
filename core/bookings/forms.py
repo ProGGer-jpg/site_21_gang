@@ -32,6 +32,11 @@ class QuickBookingForm(forms.ModelForm):
         if self.user and not self.instance.pk:
             self.fields['client_name'].initial = self.user.get_full_name() or self.user.username
 
+        if self.user and self.user.is_authenticated:
+            self.instance.employee = self.user
+            if not self.instance.pk:
+                self.fields['client_name'].initial = self.user.get_full_name() or self.user.username
+
     # def clean(self):
     #     cleaned_data = super().clean()
     #     start_time = cleaned_data.get('start_time')

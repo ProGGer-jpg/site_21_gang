@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .forms import QuickBookingForm
 from .models import Booking
 
-
+@login_required
 def quick_booking(request):
     # 1. Автоматически завершаем все истекшие брони
     Booking.objects.filter(
