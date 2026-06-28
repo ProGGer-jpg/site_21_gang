@@ -1,0 +1,89 @@
+{% extends "bookings/base.html" %}
+{% block title %}Заявки на добавление игр{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">🎮 Заявки на добавление игр</h2>
+            <a href="{% url 'game_requests:submit_request' %}" class="btn btn-success btn-lg">
+                + Новая заявка
+            </a>
+        </div>
+
+        <!-- Фильтры по статусу -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body py-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="text-muted me-2">Фильтр:</span>
+                    <a href="{% url 'game_requests:request_list' %}"
+                       class="btn btn-sm {% if not current_status %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        Все
+                    </a>
+                    {% for code, label in status_choices %}
+                        <a href="?status={{ code }}"
+                           class="btn btn-sm {% if current_status == code %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            {{ label }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Список заявок -->
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📋 Все заявки</h5>
+                <span class="badge bg-light text-dark">{{ requests|length }}</span>
+            </div>
+
+            {% if requests %}
+            <ul class="list-group list-group-flush">
+                {% for req in requests %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <strong class="fs-5">{{ req.title }}</strong>
+                                    <span class="badge bg-secondary">{{ req.platform }}</span>
+                                    {% if req.status == 'new' %}
+                                        <span class="badge bg-secondary">🆕 Новая</span>
+                                    {% elif req.status == 'approved' %}
+                                        <span class="badge bg-info">✅ Одобрена</span>
+                                    {% elif req.status == 'added' %}
+                                        <span class="badge bg-success">🎉 Добавлена</span>
+                                    {% elif req.status == 'rejected' %}
+                                        <span class="badge bg-danger">❌ Отклонена</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    👤 Подал: <strong>{{ req.requester.get_full_name|default:req.requester.username }}</strong>
+                                    <span class="mx-2">•</span>
+                                    📅 {{ req.created_at|date:"d.m.Y в H:i" }}
+                                </div>
+                                {% if req.reason %}
+                                    <div class="mt-2 text-secondary small">
+                                        💬 {{ req.reason|truncatewords:20 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="ms-3">
+                                <a href="{% url 'game_requests:request_detail' req.pk %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    Открыть →
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <div class="list-group-item text-muted text-center py-4">
+                    📭 Заявок пока нет
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

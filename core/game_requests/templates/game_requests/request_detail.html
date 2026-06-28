@@ -1,0 +1,92 @@
+{% extends "bookings/base.html" %}
+{% block title %}Заявка: {{ game_request.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <a href="{% url 'game_requests:request_list' %}" class="btn btn-outline-secondary btn-sm mb-3">
+            ← Назад к списку
+        </a>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">🎮 {{ game_request.title }}</h3>
+                    {% if game_request.status == 'new' %}
+                        <span class="badge bg-light text-dark fs-6">🆕 Новая</span>
+                    {% elif game_request.status == 'approved' %}
+                        <span class="badge bg-light text-dark fs-6">✅ Одобрена</span>
+                    {% elif game_request.status == 'added' %}
+                        <span class="badge bg-light text-dark fs-6">🎉 Добавлена</span>
+                    {% elif game_request.status == 'rejected' %}
+                        <span class="badge bg-light text-dark fs-6">❌ Отклонена</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <span class="text-muted">Платформа:</span>
+                            <span class="badge bg-secondary ms-2">{{ game_request.platform }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted">Статус:</span>
+                            <strong class="ms-2">{{ game_request.get_status_display }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <span class="text-muted">Подал:</span>
+                            <strong class="ms-2">{{ game_request.requester.get_full_name|default:game_request.requester.username }}</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted">Дата подачи:</span>
+                            <strong class="ms-2">{{ game_request.created_at|date:"d.m.Y в H:i" }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">💬 Почему стоит добавить:</h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ game_request.reason|linebreaks }}
+                    </div>
+                </div>
+
+                {% if game_request.admin_comment %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">👨‍💼 Комментарий администратора:</h6>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded border-start border-4 border-warning">
+                            {{ game_request.admin_comment|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if admin_form %}
+                    <hr>
+                    <h5 class="mb-3">⚙️ Управление заявкой</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Изменить статус</label>
+                            {{ admin_form.status }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Комментарий администратора</label>
+                            {{ admin_form.admin_comment }}
+                            <div class="form-text">Необязательно. Можно указать причину отказа или комментарий.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            💾 Сохранить изменения
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

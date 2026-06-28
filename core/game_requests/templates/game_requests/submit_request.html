@@ -1,0 +1,53 @@
+{% extends "bookings/base.html" %}
+{% block title %}Подать заявку на игру{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4 text-center">📝 Подать заявку на добавление игры</h2>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Новая заявка</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Название игры</label>
+                        {{ form.title }}
+                        <div class="form-text">Например: GTA VI, Elden Ring, FIFA 25</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Платформа</label>
+                        {{ form.platform }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Почему стоит добавить?</label>
+                        {{ form.reason }}
+                        <div class="form-text">Например: клиенты часто просят, популярная новинка</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                            📤 Отправить заявку
+                        </button>
+                        <a href="{% url 'game_requests:request_list' %}" class="btn btn-outline-secondary btn-lg">
+                            Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{% url 'game_requests:request_list' %}" class="text-muted">
+                ← Вернуться к списку заявок
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
