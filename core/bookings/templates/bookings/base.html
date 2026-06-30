@@ -14,7 +14,7 @@
         <div class="d-flex align-items-center">
             <a href="/" class="btn btn-outline-primary btn-sm me-2">Бронирование</a>
             <a href="{% url 'game_requests:request_list' %}" class="btn btn-outline-primary btn-sm me-2">Заявки на игры</a>
-            <a href="{% url 'game_requests:submit_request' %}" class="btn btn-success btn-sm me-3">+ Подать заявку</a>
+            <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-outline-primary btn-sm me-3">🏆 Турниры</a>
             <span class="text-muted me-2">Привет,</span>
             <a href="{% url 'profile' %}" class="btn btn-outline-primary">
                 <strong>{{ user.get_full_name|default:user.username }}</strong>

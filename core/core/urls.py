@@ -6,4 +6,5 @@ urlpatterns = [
     path('', include('bookings.urls')), # Главная страница - это бронирование
     path('accounts/', include('accounts.urls')),
     path('requests/', include('game_requests.urls')),
+    path('tournaments/', include('tournaments.urls')),
 ]

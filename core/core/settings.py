@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'catalog_21',
     'bookings',
     'accounts',
-    'game_requests'
+    'game_requests',
+    'tournaments',
 ]
 
 MIDDLEWARE = [
