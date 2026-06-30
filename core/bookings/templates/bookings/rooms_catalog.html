@@ -1,0 +1,62 @@
+{% extends "bookings/base.html" %}
+{% block title %}Бронирование дисков{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Все доступные комнаты</h2>
+            <p class="text-muted">Нажмите на комнату, чтобы забронировать её</p>
+        </div>
+    </div>
+
+    <!-- Сетка карточек -->
+    <div class="row g-4">
+        {% for item in rooms_with_status %}
+            <div class="col-md-4 col-lg-3">
+                <div class="card room-card h-100 {% if item.is_active %}in-use{% else %}available{% endif %}">
+                    <div class="card-body position-relative">
+                        <!-- Статус -->
+                        <span class="badge status-badge {% if item.is_active %}bg-danger{% else %}bg-success{% endif %}">
+                            {% if item.is_active %}
+                                Занята
+                            {% else %}
+                                Свободна
+                            {% endif %}
+                        </span>
+
+                        <!-- Информация о комнате -->
+                        <h5 class="card-title">{{ item.room.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                {{ item.room.platform }}
+                            </small>
+                        </p>
+                        <p class="card-text">
+                            <small class="text-secondary">
+                                ID комнаты: {{ item.room.id }}
+                            </small>
+                        </p>
+
+                        <!-- Кнопка бронирования -->
+                        <a href="{% url 'quick_booking' %}?room={{ item.room.id }}"
+                           class="btn btn-primary w-100 mt-2">
+                            {% if item.is_active %}
+                                Забронировать позже
+                            {% else %}
+                                Забронировать сейчас
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                     В каталоге пока нет комнат
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

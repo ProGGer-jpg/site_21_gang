@@ -13,6 +13,8 @@
         <a class="navbar-brand mb-0 h1 text-decoration-none" href="/">🎮 Система бронирования</a>
         <div class="d-flex align-items-center">
             <a href="/" class="btn btn-outline-primary btn-sm me-2">Бронирование</a>
+            <a href="{% url 'games_catalog' %}" class="btn btn-outline-success me-2">📚 Игры</a>
+            <a href="{% url 'rooms_catalog' %}" class="btn btn-outline-info me-2">🏢 Комнаты</a>
             <a href="{% url 'game_requests:request_list' %}" class="btn btn-outline-primary btn-sm me-2">Заявки на игры</a>
             <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-outline-primary btn-sm me-3">🏆 Турниры</a>
             <span class="text-muted me-2">Привет,</span>

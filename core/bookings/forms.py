@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from .models import Booking
-
+from catalog_21.models import Disc, Room
 
 class QuickBookingForm(forms.ModelForm):
     MAX_HOURS = Booking.MAX_HOURS # Максимальное время бронирования в часах
@@ -18,6 +18,24 @@ class QuickBookingForm(forms.ModelForm):
             'disc': forms.Select(attrs={'class': 'form-control'}),
             'room': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def set_disc_from_url(self, disc_id):
+        """Устанавливает диск из параметра URL"""
+        if disc_id:
+            try:
+                disc = Disc.objects.get(id=disc_id)
+                self.initial['disc'] = disc
+            except Disc.DoesNotExist:
+                pass
+
+    def set_room_from_url(self, room_id):
+        """Устанавливает комнату из параметра URL"""
+        if room_id:
+            try:
+                room = Room.objects.get(id=room_id)
+                self.initial['room'] = room
+            except Room.DoesNotExist:
+                pass
 
     def __init__(self, *args, **kwargs):
         # Получаем текущего пользователя
