@@ -5,19 +5,6 @@
 <div class="container mt-4">
     <h1>{{ title }}</h1>
 
-    {% if form.errors %}
-    <div class="alert alert-danger mt-3">
-        <strong>⚠️ Ошибки в форме:</strong>
-        <ul class="mb-0">
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
     <form method="post" class="mt-4">
         {% csrf_token %}
 
@@ -32,7 +19,7 @@
             <div class="form-text">{{ field.help_text }}</div>
             {% endif %}
             {% if field.errors %}
-            <div class="text-danger small">
+            <div class="text-danger small mt-1">
                 {% for error in field.errors %}
                 <div>{{ error }}</div>
                 {% endfor %}
@@ -44,5 +31,54 @@
         <button type="submit" class="btn btn-primary">Сохранить</button>
         <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-secondary">Отмена</a>
     </form>
+
+        {% if tournament and user.is_staff and tournament.status != 'FINISHED' %}
+    <hr class="my-4">
+    <h3>Завершить турнир</h3>
+    <p>Проставьте места и рейтинг участникам (оставьте пустым, если участник не занял место):</p>
+
+    {% with participants=tournament.tournamentparticipant_set.all %}
+    {% if participants %}
+    <form method="post" action="{% url 'tournaments:tournament_finish' tournament.pk %}">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Участник</th>
+                        <th style="width: 120px;">Место</th>
+                        <th style="width: 150px;">Рейтинг</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for participant in participants %}
+                    <tr>
+                        <td>{{ participant.user.get_full_name|default:participant.user.username }}</td>
+                        <td>
+                            <input type="number"
+                                   name="place_{{ participant.user.pk }}"
+                                   class="form-control form-control-sm"
+                                   min="1"
+                                   placeholder="Не занял">
+                        </td>
+                        <td>
+                            <input type="number"
+                                   name="rating_{{ participant.user.pk }}"
+                                   class="form-control form-control-sm"
+                                   min="0"
+                                   placeholder="0">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="submit" class="btn btn-success">Завершить турнир и начислить рейтинг</button>
+    </form>
+    {% else %}
+    <div class="alert alert-warning">Нет участников для завершения турнира</div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
 </div>
 {% endblock %}

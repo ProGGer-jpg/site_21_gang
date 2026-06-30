@@ -10,4 +10,7 @@ urlpatterns = [
     path('<int:pk>/delete/', views.tournament_delete, name='tournament_delete'),
     path('<int:pk>/join/', views.tournament_join, name='tournament_join'),
     path('<int:pk>/leave/', views.tournament_leave, name='tournament_leave'),
+    path('<int:pk>/finish/', views.tournament_finish, name='tournament_finish'),
+    path('rating/', views.rating_list, name='rating_list'),
+    path('rating/<int:user_id>/adjust/', views.adjust_rating, name='adjust_rating'),
 ]

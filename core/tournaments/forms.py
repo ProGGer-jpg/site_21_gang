@@ -6,10 +6,9 @@ from .models import Tournament
 
 class TournamentForm(forms.ModelForm):
     """Форма для создания и редактирования турниров"""
-
     class Meta:
         model = Tournament
-        fields = ['title', 'game', 'description', 'date', 'time', 'location', 'max_participants']
+        fields = ['title', 'game', 'description', 'date', 'time', 'location', 'max_participants']  # Убрал rating_reward
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
@@ -20,18 +19,6 @@ class TournamentForm(forms.ModelForm):
             'max_participants': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-    def clean_date(self):
-        """Проверка даты"""
-        date = self.cleaned_data.get('date')
-        if date and date < timezone.now().date():
-            raise ValidationError('Дата турнира не может быть в прошлом.')
-        return date
-
-    def clean_time(self):
-        """Проверка времени"""
-        time = self.cleaned_data.get('time')
-        return time
-
     def clean(self):
         """Проверяем, что дата и время турнира не в прошлом"""
         cleaned_data = super().clean()
@@ -39,19 +26,15 @@ class TournamentForm(forms.ModelForm):
         time = cleaned_data.get('time')
 
         if date and time:
-            # Собираем дату и время турнира
             tournament_datetime = timezone.datetime.combine(date, time)
-            # Делаем timezone-aware если USE_TZ=True
             if timezone.is_naive(tournament_datetime):
                 tournament_datetime = timezone.make_aware(tournament_datetime)
 
             now = timezone.now()
 
-            # Если турнир в прошлом — ошибка
-            if tournament_datetime < now:
-                raise ValidationError(
-                    'Это время или дата не подходит. '
-                    'Нельзя создать турнир в прошлом.'
-                )
+            if date < timezone.now().date():
+                self.add_error('date', 'Эта дата не подходит')
+            elif date == timezone.now().date() and tournament_datetime < now:
+                self.add_error('time', 'Это время не подходит')
 
         return cleaned_data

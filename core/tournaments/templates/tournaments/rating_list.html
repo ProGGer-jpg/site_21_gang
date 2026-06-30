@@ -1,0 +1,49 @@
+{% extends "bookings/base.html" %}
+{% block title %}Рейтинг игроков{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>📊 Рейтинг игроков</h1>
+
+    {% if ratings %}
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Место</th>
+                <th>Игрок</th>
+                <th>Рейтинг</th>
+                {% if user.is_staff %}
+                <th>Вычесть баллы</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for rating in ratings %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ rating.user.get_full_name|default:rating.user.username }}</td>
+                <td><strong>{{ rating.rating }}</strong></td>
+                {% if user.is_staff and not rating.user.is_staff %}
+                <td>
+                    <form method="post" action="{% url 'tournaments:adjust_rating' rating.user.pk %}" class="d-flex">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="subtract">
+                        <input type="number" name="amount" class="form-control form-control-sm me-2"
+                               style="width: 80px;" min="1" placeholder="Сколько" required>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Вычесть</button>
+                    </form>
+                </td>
+                {% elif user.is_staff and rating.user.is_staff %}
+                <td><small class="text-muted">—</small></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info mt-4">Пока нет игроков с рейтингом</div>
+    {% endif %}
+
+    <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-secondary mt-3">← Назад к турнирам</a>
+</div>
+{% endblock %}
