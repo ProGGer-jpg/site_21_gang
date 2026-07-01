@@ -1,49 +1,233 @@
 {% extends "bookings/base.html" %}
-{% block title %}Рейтинг игроков{% endblock %}
+{% load static %}
+{% block title %}Рейтинг игроков | 21-GAME{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1>📊 Рейтинг игроков</h1>
+<style>
+    /* Фоновое видео и пелена */
+    .bg-video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: -2;
+        object-fit: cover;
+    }
+    .video-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.85);
+        z-index: -1;
+    }
+
+    /* Стилизация кибер-таблицы */
+    .cyber-table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .cyber-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px; /* Расстояние между строками */
+        color: #d1d5db;
+    }
+    .cyber-table th {
+        background: rgba(0, 0, 0, 0.4);
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        padding: 16px;
+        border: none;
+        font-weight: 600;
+    }
+    .cyber-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .cyber-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+    /* Стили строк (карточек) */
+    .cyber-table td {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 16px;
+        vertical-align: middle;
+        transition: background 0.3s ease;
+    }
+    .cyber-table tr:hover td {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .cyber-table tr td:first-child {
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+    .cyber-table tr td:last-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    /* Подсветка Топ-3 */
+    .rank-1 td:first-child { border-left: 4px solid #fbbf24 !important; } /* Золото */
+    .rank-2 td:first-child { border-left: 4px solid #9ca3af !important; } /* Серебро */
+    .rank-3 td:first-child { border-left: 4px solid #b45309 !important; } /* Бронза */
+
+    .rank-number {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+    }
+    .rank-1 .rank-number { color: #fbbf24; }
+    .rank-2 .rank-number { color: #9ca3af; }
+    .rank-3 .rank-number { color: #b45309; }
+
+    /* Поля и кнопки для админа */
+    .cyber-input {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        width: 100px;
+        transition: all 0.3s ease;
+    }
+    .cyber-input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.06);
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+    .cyber-btn-danger {
+        background: transparent;
+        color: #ef4444;
+        border: 1px solid #ef4444;
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+    }
+    .cyber-btn-danger:hover {
+        background: #ef4444;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        transform: translateY(-1px);
+    }
+
+    /* Кнопка назад */
+    .cyber-btn-back {
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    .cyber-btn-back:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+</style>
+
+<video autoplay loop muted playsinline class="bg-video">
+    <source src="{% static '21GAME.mp4' %}" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="container mt-5 position-relative">
+
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold text-white text-uppercase" style="letter-spacing: 1px;">
+                Рейтинг <span style="color: #10b981;">Игроков</span>
+            </h1>
+            <p class="text-secondary" style="font-size: 1.1rem;">Лучшие из лучших на нашей арене</p>
+        </div>
+    </div>
 
     {% if ratings %}
-    <table class="table table-striped mt-4">
-        <thead>
-            <tr>
-                <th>Место</th>
-                <th>Игрок</th>
-                <th>Рейтинг</th>
-                {% if user.is_staff %}
-                <th>Вычесть баллы</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for rating in ratings %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ rating.user.get_full_name|default:rating.user.username }}</td>
-                <td><strong>{{ rating.rating }}</strong></td>
-                {% if user.is_staff and not rating.user.is_staff %}
-                <td>
-                    <form method="post" action="{% url 'tournaments:adjust_rating' rating.user.pk %}" class="d-flex">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="subtract">
-                        <input type="number" name="amount" class="form-control form-control-sm me-2"
-                               style="width: 80px;" min="1" placeholder="Сколько" required>
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Вычесть</button>
-                    </form>
-                </td>
-                {% elif user.is_staff and rating.user.is_staff %}
-                <td><small class="text-muted">—</small></td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="cyber-table-container">
+                <table class="cyber-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 10%;">Место</th>
+                            <th>Игрок</th>
+                            <th class="text-center">Рейтинг</th>
+                            {% if user.is_staff %}
+                            <th class="text-end" style="padding-right: 20px;">Управление</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rating in ratings %}
+                        <tr class="{% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% endif %}">
+
+                            <td class="text-center">
+                                <span class="rank-number">#{{ forloop.counter }}</span>
+                                {% if forloop.counter == 1 %} 👑 {% endif %}
+                            </td>
+
+                            <td>
+                                <strong class="text-white" style="font-size: 1.1rem;">
+                                    {{ rating.user.get_full_name|default:rating.user.username }}
+                                </strong>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 1rem; padding: 8px 16px;">
+                                    {{ rating.rating }} PTS
+                                </span>
+                            </td>
+
+                            {% if user.is_staff %}
+                            <td class="text-end">
+                                {% if not rating.user.is_staff %}
+                                <form method="post" action="{% url 'tournaments:adjust_rating' rating.user.pk %}" class="d-flex justify-content-end align-items-center m-0 gap-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="subtract">
+                                    <input type="number" name="amount" class="cyber-input" min="1" placeholder="Кол-во" required>
+                                    <button type="submit" class="cyber-btn-danger">Вычесть</button>
+                                </form>
+                                {% else %}
+                                <small class="text-secondary" style="margin-right: 15px;">АДМИН</small>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     {% else %}
-    <div class="alert alert-info mt-4">Пока нет игроков с рейтингом</div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert text-center py-4" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; border-radius: 12px;">
+                📊 Пока нет игроков с рейтингом. Самое время начать турнир!
+            </div>
+        </div>
+    </div>
     {% endif %}
 
-    <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-secondary mt-3">← Назад к турнирам</a>
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{% url 'tournaments:tournament_list' %}" class="cyber-btn-back">← Вернуться к турнирам</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,92 +1,85 @@
 {% extends "bookings/base.html" %}
-{% block title %}Заявка: {{ game_request.title }}{% endblock %}
+{% load static %}
+{% block title %}Заявка: {{ game_request.title }} | 21-GAME{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <a href="{% url 'game_requests:request_list' %}" class="btn btn-outline-secondary btn-sm mb-3">
-            ← Назад к списку
-        </a>
+<style>
+    .bg-video { position: fixed; top: 0; left: 0; min-width: 100%; min-height: 100%; z-index: -2; object-fit: cover; }
+    .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: -1; }
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">🎮 {{ game_request.title }}</h3>
-                    {% if game_request.status == 'new' %}
-                        <span class="badge bg-light text-dark fs-6">🆕 Новая</span>
-                    {% elif game_request.status == 'approved' %}
-                        <span class="badge bg-light text-dark fs-6">✅ Одобрена</span>
-                    {% elif game_request.status == 'added' %}
-                        <span class="badge bg-light text-dark fs-6">🎉 Добавлена</span>
-                    {% elif game_request.status == 'rejected' %}
-                        <span class="badge bg-light text-dark fs-6">❌ Отклонена</span>
+    .cyber-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: #d1d5db; padding: 2rem; }
+
+    .info-block { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem; }
+    .admin-comment { background: rgba(245, 158, 11, 0.05); border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 1.5rem; }
+
+    .cyber-input { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #ffffff; }
+    .cyber-input:focus { outline: none; border-color: #38bdf8; }
+    select.cyber-input option { background: #0f172a; color: #fff; }
+</style>
+
+<video autoplay loop muted playsinline class="bg-video"><source src="{% static '21GAME.mp4' %}" type="video/mp4"></video>
+<div class="video-overlay"></div>
+
+<div class="container mt-4 position-relative">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <a href="{% url 'game_requests:request_list' %}" class="btn mb-4 text-uppercase fw-bold" style="background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem;">← Назад к списку</a>
+
+            <div class="cyber-card shadow-lg" style="border-top: 4px solid #38bdf8;">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <h2 class="mb-0 text-white fw-bold">🎮 {{ game_request.title }}</h2>
+                    {% if game_request.status == 'new' %}<span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid #94a3b8; font-size: 0.9rem; padding: 8px 12px;">🆕 Новая</span>
+                    {% elif game_request.status == 'approved' %}<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.9rem; padding: 8px 12px;">✅ Одобрена</span>
+                    {% elif game_request.status == 'added' %}<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; font-size: 0.9rem; padding: 8px 12px;">🎉 Добавлена</span>
+                    {% elif game_request.status == 'rejected' %}<span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-size: 0.9rem; padding: 8px 12px;">❌ Отклонена</span>
                     {% endif %}
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
+
+                <div class="row mb-4">
                     <div class="col-md-6">
-                        <div class="mb-2">
-                            <span class="text-muted">Платформа:</span>
-                            <span class="badge bg-secondary ms-2">{{ game_request.platform }}</span>
-                        </div>
-                        <div class="mb-2">
-                            <span class="text-muted">Статус:</span>
-                            <strong class="ms-2">{{ game_request.get_status_display }}</strong>
-                        </div>
+                        <p class="mb-2"><span class="text-secondary text-uppercase" style="font-size: 0.8rem;">Платформа:</span> <span class="badge bg-secondary ms-2">{{ game_request.platform }}</span></p>
+                        <p class="mb-2"><span class="text-secondary text-uppercase" style="font-size: 0.8rem;">Статус:</span> <strong class="text-white ms-2">{{ game_request.get_status_display }}</strong></p>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-2">
-                            <span class="text-muted">Подал:</span>
-                            <strong class="ms-2">{{ game_request.requester.get_full_name|default:game_request.requester.username }}</strong>
-                        </div>
-                        <div class="mb-2">
-                            <span class="text-muted">Дата подачи:</span>
-                            <strong class="ms-2">{{ game_request.created_at|date:"d.m.Y в H:i" }}</strong>
-                        </div>
+                        <p class="mb-2"><span class="text-secondary text-uppercase" style="font-size: 0.8rem;">Подал:</span> <strong class="text-white ms-2">{{ game_request.requester.get_full_name|default:game_request.requester.username }}</strong></p>
+                        <p class="mb-2"><span class="text-secondary text-uppercase" style="font-size: 0.8rem;">Дата подачи:</span> <strong class="text-white ms-2">{{ game_request.created_at|date:"d.m.Y в H:i" }}</strong></p>
                     </div>
                 </div>
 
-                <hr>
-
-                <div class="mb-3">
-                    <h6 class="text-muted mb-2">💬 Почему стоит добавить:</h6>
-                    <div class="bg-light p-3 rounded">
-                        {{ game_request.reason|linebreaks }}
-                    </div>
+                <div class="info-block mb-4">
+                    <h6 class="text-secondary text-uppercase fw-bold mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">💬 Почему стоит добавить:</h6>
+                    <p class="m-0 text-white" style="line-height: 1.6;">{{ game_request.reason|linebreaksbr }}</p>
                 </div>
 
                 {% if game_request.admin_comment %}
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">👨‍💼 Комментарий администратора:</h6>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded border-start border-4 border-warning">
-                            {{ game_request.admin_comment|linebreaks }}
-                        </div>
+                    <div class="admin-comment mb-4">
+                        <h6 class="text-uppercase fw-bold mb-3" style="color: #f59e0b; font-size: 0.85rem; letter-spacing: 1px;">👨‍💼 Ответ администратора:</h6>
+                        <p class="m-0 text-white" style="line-height: 1.6;">{{ game_request.admin_comment|linebreaksbr }}</p>
                     </div>
                 {% endif %}
 
                 {% if admin_form %}
-                    <hr>
-                    <h5 class="mb-3">⚙️ Управление заявкой</h5>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label">Изменить статус</label>
-                            {{ admin_form.status }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Комментарий администратора</label>
-                            {{ admin_form.admin_comment }}
-                            <div class="form-text">Необязательно. Можно указать причину отказа или комментарий.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            💾 Сохранить изменения
-                        </button>
-                    </form>
+                    <div class="mt-5 pt-4 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <h5 class="mb-4 text-white fw-bold text-uppercase">⚙️ Панель администратора</h5>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="form-label text-secondary text-uppercase" style="font-size: 0.8rem;">Изменить статус</label>
+                                {{ admin_form.status }}
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-secondary text-uppercase" style="font-size: 0.8rem;">Комментарий к решению</label>
+                                {{ admin_form.admin_comment }}
+                                <div class="form-text mt-2" style="color: #64748b;">Укажи причину отказа или примерную дату добавления игры.</div>
+                            </div>
+                            <button type="submit" class="btn w-100 fw-bold" style="background: #38bdf8; color: #0f172a; padding: 12px; letter-spacing: 1px; text-transform: uppercase;">💾 Сохранить решение</button>
+                        </form>
+                    </div>
                 {% endif %}
             </div>
         </div>
-
     </div>
 </div>
+<!-- Скрипт для стилизации инпутов -->
+<script>document.querySelectorAll('select, textarea').forEach(el => el.classList.add('cyber-input'));</script>
 {% endblock %}
