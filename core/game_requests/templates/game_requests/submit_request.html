@@ -1,144 +1,53 @@
 {% extends "bookings/base.html" %}
 {% load static %}
-{% block title %}Мой профиль | 21-GAME{% endblock %}
+{% block title %}Подать заявку на игру | 21-GAME{% endblock %}
 
 {% block content %}
 <style>
     .bg-video { position: fixed; top: 0; left: 0; min-width: 100%; min-height: 100%; z-index: -2; object-fit: cover; }
     .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: -1; }
+    .cyber-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: #d1d5db; padding: 2rem; }
 
-    .cyber-card {
-        background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: #d1d5db;
-    }
-    .cyber-card-header { background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 15px 20px; border-radius: 12px 12px 0 0; }
-
-    .cyber-table { width: 100%; border-collapse: separate; border-spacing: 0; color: #d1d5db; }
-    .cyber-table th { background: rgba(0,0,0,0.2); color: #94a3b8; font-weight: 600; padding: 12px; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .cyber-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .cyber-table tr:hover td { background: rgba(255,255,255,0.03); }
-
-    .cyber-btn { padding: 10px 20px; border-radius: 6px; font-weight: 600; text-transform: uppercase; text-decoration: none; text-align: center; transition: all 0.3s ease; border: none; display: block; width: 100%; font-size: 0.85rem; }
-    .btn-cyber-success { background: #10b981; color: #fff; } .btn-cyber-success:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); color: #fff;}
-    .btn-cyber-primary { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); } .btn-cyber-primary:hover { background: #38bdf8; color: #0f172a; transform: translateY(-2px); }
-    .btn-cyber-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); } .btn-cyber-danger:hover { background: #ef4444; color: #fff; transform: translateY(-2px); }
+    .cyber-input { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #ffffff; transition: all 0.3s ease; }
+    .cyber-input:focus { outline: none; background: rgba(255, 255, 255, 0.06); border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+    select.cyber-input option { background: #0f172a; color: #fff; }
 </style>
 
 <video autoplay loop muted playsinline class="bg-video"><source src="{% static '21GAME.mp4' %}" type="video/mp4"></video>
 <div class="video-overlay"></div>
 
-<div class="container mt-5 position-relative">
-    <div class="row g-4">
-
-        <!-- Левая колонка: Профиль -->
-        <div class="col-md-4">
-            <div class="cyber-card" style="border-top: 4px solid #38bdf8;">
-                <div class="cyber-card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white fw-bold">👤 МОЙ ПРОФИЛЬ</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="mb-3"><span class="text-secondary">Имя:</span> <strong class="text-white float-end">{{ profile.user.get_full_name|default:"Не указано" }}</strong></div>
-                    <div class="mb-3"><span class="text-secondary">Логин:</span> <strong class="text-white float-end">{{ profile.user.username }}</strong></div>
-                    <div class="mb-3"><span class="text-secondary">Email:</span> <strong class="text-white float-end">{{ profile.user.email|default:"Не указан" }}</strong></div>
-                    <div class="mb-3"><span class="text-secondary">Телефон:</span> <strong class="text-white float-end">{{ profile.phone|default:"Не указан" }}</strong></div>
-                    <div class="mb-4 d-flex justify-content-between align-items-center">
-                        <span class="text-secondary">Роль:</span>
-                        {% if profile.user.is_superuser %}
-                            <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444;">Администратор</span>
-                        {% else %}
-                            <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">{{ profile.get_role_display }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="d-flex flex-column gap-2 mt-4 pt-4" style="border-top: 1px solid rgba(255,255,255,0.05);">
-                        {% if user.is_staff %}
-                        <a href="{% url 'register_employee' %}" class="cyber-btn btn-cyber-success mb-2">➕ Новый сотрудник</a>
-                        {% endif %}
-                        <a href="{% url 'quick_booking' %}" class="cyber-btn btn-cyber-primary">На главную</a>
-                        <a href="{% url 'logout' %}" class="cyber-btn btn-cyber-danger">Выйти</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Правая колонка: Брони и Пользователи -->
+<div class="container mt-4 position-relative">
+    <div class="row justify-content-center">
         <div class="col-md-8">
+            <h2 class="mb-4 text-center text-white fw-bold text-uppercase">📝 Добавить игру</h2>
 
-            <!-- Брони -->
-            <div class="cyber-card mb-4" style="border-top: 4px solid #10b981;">
-                <div class="cyber-card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white fw-bold">
-                        {% if user.is_superuser %}📋 ВСЕ АКТИВНЫЕ БРОНИ{% else %}📋 МОИ АКТИВНЫЕ БРОНИ{% endif %}
-                    </h5>
-                    <span class="badge bg-success">{{ user_bookings.count }}</span>
-                </div>
-                <div class="card-body p-0">
-                    {% if user_bookings %}
-                        <div class="table-responsive">
-                            <table class="cyber-table">
-                                <thead><tr><th>Клиент</th><th>Игра</th><th>Комната</th><th>Время</th><th class="text-end">Действие</th></tr></thead>
-                                <tbody>
-                                    {% for booking in user_bookings %}
-                                        <tr>
-                                            <td><strong class="text-white">{{ booking.client_name }}</strong><br><small class="text-secondary">{{ booking.client_phone|default:"—" }}</small></td>
-                                            <td><span style="color: #38bdf8;">{{ booking.disc.game.title }}</span><br><small class="text-secondary">{{ booking.disc.barcode }}</small></td>
-                                            <td>{{ booking.room }}</td>
-                                            <td>
-                                                <small class="text-white">{{ booking.start_time|date:"d.m H:i" }} - {{ booking.end_time|date:"H:i" }}</small><br>
-                                                {% if booking.start_time > now %}
-                                                    <span class="badge" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">через {{ booking.start_time|timeuntil }}</span>
-                                                {% else %}
-                                                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">осталось {{ booking.end_time|timeuntil }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="text-end">
-                                                <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Отменить бронь для {{ booking.client_name }}?')">Отменить</a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5 text-secondary">📭 Активных броней нет</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Пользователи (только для админов) -->
-            {% if user.is_superuser and all_users %}
-            <div class="cyber-card" style="border-top: 4px solid #f59e0b;">
-                <div class="cyber-card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white fw-bold">👥 ВСЕ СОТРУДНИКИ</h5>
-                    <span class="badge" style="background: #f59e0b; color: #000;">{{ all_users.count }}</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="cyber-table">
-                            <thead><tr><th>Логин</th><th>Имя</th><th>Email</th><th>Регистрация</th><th class="text-end">Действие</th></tr></thead>
-                            <tbody>
-                                {% for emp_user in all_users %}
-                                    <tr>
-                                        <td>
-                                            <strong class="text-white">{{ emp_user.username }}</strong>
-                                            {% if emp_user.is_staff %}<span class="badge ms-2" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">Сотрудник</span>{% endif %}
-                                        </td>
-                                        <td>{{ emp_user.get_full_name|default:"—" }}</td>
-                                        <td>{{ emp_user.email|default:"—" }}</td>
-                                        <td><small class="text-secondary">{{ emp_user.date_joined|date:"d.m.Y" }}</small></td>
-                                        <td class="text-end">
-                                            <a href="{% url 'delete_user' emp_user.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить пользователя {{ emp_user.username }}?')">🗑️ Удалить</a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <div class="cyber-card shadow-lg" style="border-top: 4px solid #10b981;">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label text-secondary text-uppercase" style="font-size: 0.85rem;">Название игры</label>
+                        {{ form.title }}
+                        <div class="form-text mt-2" style="color: #64748b;">Например: GTA VI, Elden Ring, FIFA 25</div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
+                    <div class="mb-4">
+                        <label class="form-label text-secondary text-uppercase" style="font-size: 0.85rem;">Платформа</label>
+                        {{ form.platform }}
+                    </div>
+                    <div class="mb-5">
+                        <label class="form-label text-secondary text-uppercase" style="font-size: 0.85rem;">Почему стоит добавить?</label>
+                        {{ form.reason }}
+                        <div class="form-text mt-2" style="color: #64748b;">Например: клиенты часто просят, популярная новинка</div>
+                    </div>
 
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn w-100 fw-bold" style="background: #10b981; color: #fff; padding: 12px; letter-spacing: 1px;">📤 ОТПРАВИТЬ ЗАЯВКУ</button>
+                        <a href="{% url 'game_requests:request_list' %}" class="btn w-100 fw-bold" style="background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 12px; letter-spacing: 1px;">ОТМЕНА</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+<!-- Скрипт для добавления класса инпутам Джанго -->
+<script>document.querySelectorAll('input, select, textarea').forEach(el => el.classList.add('cyber-input'));</script>
 {% endblock %}

@@ -8,6 +8,7 @@ from datetime import timedelta
 
 class Booking(models.Model):
     MAX_HOURS = 3
+    MIN_MINUTS = 30
     """Запись в тетради (Бронирование)"""
 
     class Status(models.TextChoices):
@@ -62,7 +63,7 @@ class Booking(models.Model):
                 )
 
             # 4. Проверка на минимальное время (30 минут)
-            if duration < timedelta(minutes=30):
+            if duration < timedelta(minutes=self.MIN_MINUTS):
                 raise ValidationError("Минимальное время бронирования — 30 минут.")
 
             # 5. Проверка на пересечения дисков
@@ -125,7 +126,7 @@ class Booking(models.Model):
                     if planned_count.count() >= 2:
                         raise ValidationError(
                             "У вас уже есть 2 запланированные брони. "
-                            "Максимум 2 запланированные брони на сотрудника."
+                            "Максимум 2 запланированные брони на пользователя."
                         )
 
     def __str__(self):
